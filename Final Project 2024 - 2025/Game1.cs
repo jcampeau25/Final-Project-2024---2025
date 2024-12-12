@@ -9,11 +9,11 @@ namespace Final_Project_2024___2025
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        Texture2D hallwayTexture, titleBackgroundTexture, runLeftTexture, runRightTexture, idleTexture;
-        Rectangle window;
+        Texture2D hallwayTexture, titleBackgroundTexture, runLeftTexture, runRightTexture, idleTexture, buttonTexture;
+        Rectangle window, playButtonRect, levelButtonRect;
         Screen screen;
-        MouseState mouseState;
-        SpriteFont introFont;
+        MouseState mouseState, prevMouseState;
+        SpriteFont introFont, buttonFont;
 
         enum Screen
         {
@@ -34,6 +34,8 @@ namespace Final_Project_2024___2025
 
             base.Initialize();
             window = new Rectangle(0, 0, 1000, 600);
+            playButtonRect = new Rectangle(568, 330, 180, 75);
+            levelButtonRect = new Rectangle(568, 430, 180, 75);
         }
 
         protected override void LoadContent()
@@ -50,10 +52,13 @@ namespace Final_Project_2024___2025
             titleBackgroundTexture = Content.Load<Texture2D>("titleBackground");
             hallwayTexture = Content.Load<Texture2D>("prison background");
             introFont = Content.Load<SpriteFont>("introFont");
+            buttonFont = Content.Load<SpriteFont>("ButtonFont");
+            buttonTexture = Content.Load<Texture2D>("rectangle");
         }
 
         protected override void Update(GameTime gameTime)
         {
+            prevMouseState = mouseState;
             mouseState = Mouse.GetState();
             this.Window.Title = $"x = {mouseState.X}, y = {mouseState.Y}";
 
@@ -61,7 +66,11 @@ namespace Final_Project_2024___2025
                 Exit();
 
             // TODO: Add your update logic here
-
+            if (mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton == ButtonState.Released)
+            {
+                if (playButtonRect.Contains(mouseState.Position))
+                    screen = Screen.Level1;
+            }
             base.Update(gameTime);
         }
 
@@ -75,9 +84,12 @@ namespace Final_Project_2024___2025
             {
                 _spriteBatch.Draw(titleBackgroundTexture, window, Color.White);
                 _spriteBatch.Draw(idleTexture, new Rectangle(30, 100, 266, 476), Color.White);
-                _spriteBatch.DrawString(introFont, ("Colton's"), new Vector2(500, 100), Color.OrangeRed);
-                _spriteBatch.DrawString(introFont, ("Jailhouse"), new Vector2(500, 200), Color.OrangeRed);
-
+                _spriteBatch.DrawString(introFont, ("  Colton's"), new Vector2(500, 100), Color.Red);
+                _spriteBatch.DrawString(introFont, ("Jailhouse 2"), new Vector2(500, 200), Color.Red);
+                _spriteBatch.Draw(buttonTexture, playButtonRect, Color.CornflowerBlue);
+                _spriteBatch.Draw(buttonTexture, levelButtonRect, Color.CornflowerBlue);
+                _spriteBatch.DrawString(buttonFont, ("PLAY"), new Vector2(605, 345), Color.Red);
+                _spriteBatch.DrawString(buttonFont, ("LEVELS"), new Vector2(580, 445), Color.Red);
             }
 
             if (screen == Screen.Level1)
