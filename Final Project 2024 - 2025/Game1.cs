@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
@@ -10,19 +11,26 @@ namespace Final_Project_2024___2025
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        Texture2D hallwayTexture, titleBackgroundTexture, runLeftTexture1, runLeftTexture2, runLeftTexture3, runRightTexture1, runRightTexture2, runRightTexture3, idleTexture, buttonTexture, playerTexture;
+        Texture2D hallwayTexture, titleBackgroundTexture,idleTexture, buttonTexture, playerTexture,cabinetTexture, cabinetShutTexture, cabinetOpenTexture;
         Rectangle window, playButtonRect, levelButtonRect, playerRect;
-        Vector2 playerSpeed;
+        Vector2 playerSpeed, jumpSpeed;
         Screen screen;
         MouseState mouseState, prevMouseState;
         KeyboardState keyboardState;
         SpriteFont introFont, buttonFont;
 
+        SoundEffect creak;
+        SoundEffectInstance creakInstance;
+
         int runRight = 0;
         int runLeft = 0;
+        float runSeconds = 0f;
+        bool jump = false;
+        bool onGround = false;
 
         List<Texture2D> runRightTextures;
         List<Texture2D> runLeftTextures;
+        List<Rectangle> cabinetRects;
         enum Screen
         {
             Title,
@@ -47,7 +55,9 @@ namespace Final_Project_2024___2025
             playerSpeed = new Vector2();
             runRightTextures = new List<Texture2D>();
             runLeftTextures = new List<Texture2D>();
+            cabinetRects = new List<Rectangle>();
 
+            cabinetRects.Add(new Rectangle(350, 700, 250, 214));
 
             base.Initialize();
             
@@ -76,6 +86,10 @@ namespace Final_Project_2024___2025
             runLeftTextures.Add(Content.Load<Texture2D>("coltonRunLeft1"));
             runLeftTextures.Add(Content.Load<Texture2D>("coltonRunLeft2"));
             runLeftTextures.Add(Content.Load<Texture2D>("coltonRunLeft3"));
+            cabinetShutTexture = Content.Load<Texture2D>("cabinet shut");
+            cabinetOpenTexture = Content.Load<Texture2D>("cabinet open");
+            creak = Content.Load<SoundEffect>("cabinet creak");
+            cabinetTexture = cabinetShutTexture;
             playerTexture = idleTexture;
 
 
@@ -87,7 +101,8 @@ namespace Final_Project_2024___2025
             prevMouseState = mouseState;
             mouseState = Mouse.GetState();
             keyboardState = Keyboard.GetState();
-            playerSpeed = Vector2.Zero;
+            playerSpeed = new Vector2(0, 0);
+
 
             this.Window.Title = $"x = {mouseState.X}, y = {mouseState.Y}";
 
@@ -103,24 +118,67 @@ namespace Final_Project_2024___2025
                 }
             if (screen != Screen.Title)
             {
+                if (playerRect.Bottom >= 600)
+                    onGround = true;
+
+                if (playerRect.Bottom < 600)
+                    onGround = false;
+
                 if (keyboardState.IsKeyDown(Keys.D))
                 {
-                    playerSpeed.X += 5;
-                    runRight += 1;
+                    playerSpeed.X += 7;
+                    runSeconds += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    if (runSeconds >= 0.25)
+                    {
+                        runSeconds = 0;
+                        runRight += 1;
+                    }
                     if (runRight > 2)
                         runRight = 0;
                     playerTexture = runRightTextures[runRight];
                 }
                 if (keyboardState.IsKeyDown(Keys.A))
                 {
-                    playerSpeed.X -= 5;
-                    runLeft += 1;
+                    playerSpeed.X -= 7;
+                    runSeconds += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    if (runSeconds >= 0.25)
+                    {
+                        runSeconds = 0;
+                        runLeft += 1;
+                    }
+
                     if (runLeft > 2)
                         runLeft = 0;
                     playerTexture = runLeftTextures[runLeft];
                 }
 
+                if (keyboardState.IsKeyUp(Keys.A) && keyboardState.IsKeyUp(Keys.D))
+                    playerTexture = idleTexture;
+
+
+                if (onGround == true)
+                {
+                    if (keyboardState.IsKeyDown(Keys.W))
+                    {
+                        jump = true;
+                    }
+                   
+                }
+
+                if (jump == true)
+                    playerSpeed.Y -= 7;
+
+                if (playerRect.Top <= 150)
+                {
+                    jump = false;
+
+                }
+
+                if (jump == false && playerRect.Bottom < 600)
+                    playerSpeed.Y += 7;
+
                 playerRect.X += (int)playerSpeed.X;
+                playerRect.Y += (int)playerSpeed.Y;
 
             }
             base.Update(gameTime);
@@ -148,6 +206,12 @@ namespace Final_Project_2024___2025
             {
                 _spriteBatch.Draw(hallwayTexture, window, Color.White);
                 _spriteBatch.Draw(playerTexture, playerRect, Color.White);
+                _spriteBatch.DrawString(buttonFont, ("A/D To Move"), new Vector2(60, 60), Color.Red);
+                _spriteBatch.DrawString(buttonFont, ("W To Jump"), new Vector2(380, 60), Color.Red);
+                _spriteBatch.DrawString(buttonFont, ("E to Interact"), new Vector2(670, 60), Color.Red);
+                _spriteBatch.Draw(cabinetTexture, cabinetRects[0], Color.White);
+
+
             }
             _spriteBatch.End();
             base.Draw(gameTime);
