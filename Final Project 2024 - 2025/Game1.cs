@@ -12,7 +12,7 @@ namespace Final_Project_2024___2025
         private SpriteBatch _spriteBatch;
 
         Texture2D hallwayTexture, titleBackgroundTexture,idleTexture, buttonTexture, playerTexture,cabinetTexture, cabinetShutTexture, cabinetOpenTexture;
-        Rectangle window, playButtonRect, levelButtonRect, playerRect;
+        Rectangle window, playButtonRect, levelButtonRect, playerRect, inCabinetRect;
         Vector2 playerSpeed, jumpSpeed;
         Screen screen;
         MouseState mouseState, prevMouseState;
@@ -27,6 +27,7 @@ namespace Final_Project_2024___2025
         float runSeconds = 0f;
         bool jump = false;
         bool onGround = false;
+        bool inCabinet = false;
 
         List<Texture2D> runRightTextures;
         List<Texture2D> runLeftTextures;
@@ -52,12 +53,13 @@ namespace Final_Project_2024___2025
             playButtonRect = new Rectangle(568, 330, 180, 75);
             levelButtonRect = new Rectangle(568, 430, 180, 75);
             playerRect = new Rectangle(20, 350, 250, 250);
+            inCabinetRect = new Rectangle(10000, 10000, 1, 1);
             playerSpeed = new Vector2();
             runRightTextures = new List<Texture2D>();
             runLeftTextures = new List<Texture2D>();
             cabinetRects = new List<Rectangle>();
 
-            cabinetRects.Add(new Rectangle(350, 700, 250, 214));
+            cabinetRects.Add(new Rectangle(700, 305, 150, 200));
 
             base.Initialize();
             
@@ -89,6 +91,7 @@ namespace Final_Project_2024___2025
             cabinetShutTexture = Content.Load<Texture2D>("cabinet shut");
             cabinetOpenTexture = Content.Load<Texture2D>("cabinet open");
             creak = Content.Load<SoundEffect>("cabinet creak");
+            creakInstance = creak.CreateInstance();
             cabinetTexture = cabinetShutTexture;
             playerTexture = idleTexture;
 
@@ -177,6 +180,28 @@ namespace Final_Project_2024___2025
                 if (jump == false && playerRect.Bottom < 600)
                     playerSpeed.Y += 7;
 
+                foreach (Rectangle cabinet in cabinetRects)
+                {
+                    if (playerRect.Intersects(cabinet) || playerRect.X > 9000)
+                        if (keyboardState.IsKeyDown(Keys.E))
+                        {
+                            cabinetTexture = cabinetOpenTexture;
+                            creakInstance.Play();
+                            inCabinet = !inCabinet;
+                            
+                        }
+
+
+                }
+
+                if (inCabinet == true && creakInstance.State == SoundState.Stopped)
+                {
+                    playerRect = inCabinetRect;
+                    cabinetTexture = cabinetShutTexture;
+                }
+                if (inCabinet == false && creakInstance.State == SoundState.Playing)
+                    playerRect = new Rectangle(cabinetRects[0].X, 350, 250, 250);
+
                 playerRect.X += (int)playerSpeed.X;
                 playerRect.Y += (int)playerSpeed.Y;
 
@@ -205,12 +230,12 @@ namespace Final_Project_2024___2025
             if (screen == Screen.Level1)
             {
                 _spriteBatch.Draw(hallwayTexture, window, Color.White);
-                _spriteBatch.Draw(playerTexture, playerRect, Color.White);
                 _spriteBatch.DrawString(buttonFont, ("A/D To Move"), new Vector2(60, 60), Color.Red);
                 _spriteBatch.DrawString(buttonFont, ("W To Jump"), new Vector2(380, 60), Color.Red);
                 _spriteBatch.DrawString(buttonFont, ("E to Interact"), new Vector2(670, 60), Color.Red);
                 _spriteBatch.Draw(cabinetTexture, cabinetRects[0], Color.White);
 
+                _spriteBatch.Draw(playerTexture, playerRect, Color.White);
 
             }
             _spriteBatch.End();
