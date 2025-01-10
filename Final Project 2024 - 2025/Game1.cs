@@ -14,15 +14,15 @@ namespace Final_Project_2024___2025
         Texture2D hallwayTexture, titleBackgroundTexture, idleTexture, buttonTexture, playerTexture;
         Texture2D cabinetTexture, cabinetShutTexture, cabinetOpenTexture, doorTexture, twoLayerTexture;
         Texture2D rectangleTexture, wallTexture, guardLeftTexture, guardRightTexture, guardUpTexture,guardDownTexture;
-        Rectangle window, playButtonRect, levelButtonRect, playerRect, doorRect, guardRect;
-        Vector2 playerSpeed, jumpSpeed;
+        Rectangle window, playButtonRect, levelButtonRect, playerRect, doorRect, guard1Rect;
+        Vector2 playerSpeed, guardSpeed;
         Screen screen;
         MouseState mouseState, prevMouseState;
         KeyboardState keyboardState;
         SpriteFont introFont, buttonFont;
 
-        SoundEffect creak;
-        SoundEffectInstance creakInstance;
+        SpriteEffects guard1Direction;
+
 
         int runRight = 0;
         int runLeft = 0;
@@ -33,7 +33,7 @@ namespace Final_Project_2024___2025
 
         List<Texture2D> runRightTextures;
         List<Texture2D> runLeftTextures;
-        List<Rectangle> wallRects;
+        List<Rectangle> wallRects1;
         enum Screen
         {
             Title,
@@ -57,10 +57,16 @@ namespace Final_Project_2024___2025
             levelButtonRect = new Rectangle(568, 430, 180, 75);
             playerRect = new Rectangle(20, 500, 100, 100);
             playerSpeed = new Vector2();
+            guardSpeed = new Vector2();
             runRightTextures = new List<Texture2D>();
             runLeftTextures = new List<Texture2D>();
+            wallRects1 = new List<Rectangle>();
             doorRect = new Rectangle(875, 450, 110, 180);
-            guardRect = new Rectangle(430, 200, 75, 85);
+            guard1Rect = new Rectangle(430, 200, 75, 85);
+            wallRects1.Add(new Rectangle(0, 470, 700, 20));
+            guardSpeed.Y = 5;
+            guard1Direction = SpriteEffects.None;
+
 
             base.Initialize();
             
@@ -129,7 +135,7 @@ namespace Final_Project_2024___2025
                     if (playButtonRect.Contains(mouseState.Position))
                         screen = Screen.Tutorial;
                 }
-            if (screen == Screen.Tutorial)
+            if (screen != Screen.Title && screen != Screen.LevelSelect)
             {
                     if (keyboardState.IsKeyDown(Keys.W))
                         playerSpeed.Y -= 7;
@@ -176,9 +182,33 @@ namespace Final_Project_2024___2025
                     if (keyboardState.IsKeyUp(Keys.A) && keyboardState.IsKeyUp(Keys.D))
                         playerTexture = idleTexture;
 
+                if (screen == Screen.Tutorial)
+                {
+                    
 
-                playerRect.X += (int)playerSpeed.X;
-                playerRect.Y += (int)playerSpeed.Y;
+                    if (guard1Rect.Top <= 10 || guard1Rect.Bottom >= 310)
+                    {
+                        guardSpeed.Y *= -1;
+                        if (guardSpeed.Y > 0)
+                            guard1Direction = SpriteEffects.None;
+                        else
+                            guard1Direction = SpriteEffects.FlipVertically;
+
+                    }
+
+
+
+
+                    guard1Rect.Y += (int)guardSpeed.Y;
+                    foreach (Rectangle wall in wallRects1)
+                        if (playerRect.Intersects(wall))
+                            playerRect.Offset(-playerSpeed);
+
+                }
+                
+
+                playerRect.Offset (playerSpeed);
+
 
             }
             base.Update(gameTime);
@@ -205,13 +235,18 @@ namespace Final_Project_2024___2025
             if (screen == Screen.Tutorial)
             {
                 _spriteBatch.Draw(rectangleTexture, window, Color.Black);
-                _spriteBatch.DrawString(buttonFont, ("W/A/S/D To Move"), new Vector2(60, 10), Color.Red);
+                _spriteBatch.DrawString(buttonFont, ("W/A/S/D To Move"), new Vector2(50, 10), Color.Red);
                 _spriteBatch.DrawString(buttonFont, ("Get To The Door"), new Vector2(550, 10), Color.Red);
                 _spriteBatch.Draw(doorTexture, doorRect, Color.White);
                 _spriteBatch.Draw(playerTexture, playerRect, Color.White);
-                _spriteBatch.Draw(guardDownTexture, guardRect, Color.White);
+                _spriteBatch.Draw(guardDownTexture, guard1Rect, null, Color.White, 0f, Vector2.Zero, guard1Direction, 1f);
                 _spriteBatch.Draw(wallTexture, new Rectangle(0, 470, 700, 20), Color.White);
                 _spriteBatch.Draw(wallTexture, new Rectangle(850, 340, 20, 260), Color.White);
+                _spriteBatch.Draw(wallTexture, new Rectangle(100, 320, 770, 20), Color.White);
+                _spriteBatch.Draw(wallTexture, new Rectangle(400, 0, 20, 180), Color.White);
+                _spriteBatch.Draw(wallTexture, new Rectangle(510, 0, 20, 180), Color.White);
+
+
 
             }
             _spriteBatch.End();
