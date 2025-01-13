@@ -14,7 +14,7 @@ namespace Final_Project_2024___2025
         Texture2D hallwayTexture, titleBackgroundTexture, idleTexture, buttonTexture, playerTexture;
         Texture2D cabinetTexture, cabinetShutTexture, cabinetOpenTexture, doorTexture, twoLayerTexture;
         Texture2D rectangleTexture, wallTexture, guardLeftTexture, guardRightTexture, guardUpTexture,guardDownTexture;
-        Rectangle window, playButtonRect, levelButtonRect, playerRect, doorRect, guard1Rect;
+        Rectangle window, playButtonRect, levelButtonRect, levelPassRect, playerRect, doorRect, guardRect1A;
         Vector2 playerSpeed, guardSpeed;
         Screen screen;
         MouseState mouseState, prevMouseState;
@@ -27,18 +27,20 @@ namespace Final_Project_2024___2025
         int runRight = 0;
         int runLeft = 0;
         float runSeconds = 0f;
-        bool jump = false;
-        bool onGround = false;
-        bool inCabinet = false;
+
 
         List<Texture2D> runRightTextures;
         List<Texture2D> runLeftTextures;
         List<Rectangle> wallRects1;
+        List<Rectangle> guardRects1;
+
         enum Screen
         {
             Title,
             LevelSelect,
             Tutorial,
+            PassLevel,
+            FailLevel,
             Level1
         }
         public Game1()
@@ -55,18 +57,25 @@ namespace Final_Project_2024___2025
             window = new Rectangle(0, 0, 1000, 600);
             playButtonRect = new Rectangle(568, 330, 180, 75);
             levelButtonRect = new Rectangle(568, 430, 180, 75);
-            playerRect = new Rectangle(20, 500, 100, 100);
+            levelPassRect = new Rectangle(400, 250, 200, 100);
+            playerRect = new Rectangle(20, 500, 80, 80);
             playerSpeed = new Vector2();
             guardSpeed = new Vector2();
             runRightTextures = new List<Texture2D>();
             runLeftTextures = new List<Texture2D>();
             wallRects1 = new List<Rectangle>();
+            guardRects1 = new List<Rectangle>();
             doorRect = new Rectangle(875, 450, 110, 180);
-            guard1Rect = new Rectangle(430, 200, 75, 85);
+            
             wallRects1.Add(new Rectangle(0, 470, 700, 20));
-            guardSpeed.Y = 5;
+            wallRects1.Add(new Rectangle(850, 340, 20, 260));
+            wallRects1.Add(new Rectangle(150, 320, 720, 20));
+            wallRects1.Add(new Rectangle(400, 0, 20, 180));
+            wallRects1.Add(new Rectangle(510, 0, 20, 180));
+            guardSpeed.Y = 1;
             guard1Direction = SpriteEffects.None;
 
+            guardRects1.Add(new Rectangle(435, 200, 50, 65));
 
             base.Initialize();
             
@@ -143,13 +152,9 @@ namespace Final_Project_2024___2025
                     if (keyboardState.IsKeyDown(Keys.S))
                         playerSpeed.Y += 7;
 
-
-                
-                    if (playerRect.Bottom >= 600)
-                        onGround = true;
-
-                    if (playerRect.Bottom < 600)
-                        onGround = false;
+                    if(doorRect .Contains(playerRect))
+                        screen = Screen.PassLevel;
+        
 
                     if (keyboardState.IsKeyDown(Keys.D))
                     {
@@ -186,7 +191,7 @@ namespace Final_Project_2024___2025
                 {
                     
 
-                    if (guard1Rect.Top <= 10 || guard1Rect.Bottom >= 310)
+                    if (guardRect1A.Top <= 10 || guardRect1A.Bottom >= 310)
                     {
                         guardSpeed.Y *= -1;
                         if (guardSpeed.Y > 0)
@@ -196,18 +201,32 @@ namespace Final_Project_2024___2025
 
                     }
 
+                    playerRect.Offset(playerSpeed);
+                    Rectangle tempRect;
+                    // Move all guards
+                    for (int i = 0; i < guardRects1.Count; i++)
+                    {
+                        tempRect = guardRects1[i];
+                        tempRect.Offset(guardSpeed);
+                        guardRects1[i] = tempRect;
+
+                    }
+                    
 
 
+                    foreach (Rectangle guard in guardRects1)
+                        if (playerRect.Intersects(guard))
+                            playerRect = new Rectangle(20, 500, 100, 100);
 
-                    guard1Rect.Y += (int)guardSpeed.Y;
                     foreach (Rectangle wall in wallRects1)
                         if (playerRect.Intersects(wall))
                             playerRect.Offset(-playerSpeed);
 
+                    if (playerRect.Top < 0 || playerRect.Bottom > 600 || playerRect.Left < 0 || playerRect.Right > 1000)
+                        playerRect.Offset(-playerSpeed);
                 }
                 
 
-                playerRect.Offset (playerSpeed);
 
 
             }
@@ -239,13 +258,23 @@ namespace Final_Project_2024___2025
                 _spriteBatch.DrawString(buttonFont, ("Get To The Door"), new Vector2(550, 10), Color.Red);
                 _spriteBatch.Draw(doorTexture, doorRect, Color.White);
                 _spriteBatch.Draw(playerTexture, playerRect, Color.White);
-                _spriteBatch.Draw(guardDownTexture, guard1Rect, null, Color.White, 0f, Vector2.Zero, guard1Direction, 1f);
-                _spriteBatch.Draw(wallTexture, new Rectangle(0, 470, 700, 20), Color.White);
-                _spriteBatch.Draw(wallTexture, new Rectangle(850, 340, 20, 260), Color.White);
-                _spriteBatch.Draw(wallTexture, new Rectangle(100, 320, 770, 20), Color.White);
-                _spriteBatch.Draw(wallTexture, new Rectangle(400, 0, 20, 180), Color.White);
-                _spriteBatch.Draw(wallTexture, new Rectangle(510, 0, 20, 180), Color.White);
+                _spriteBatch.Draw(guardDownTexture, guardRect1A, null, Color.White, 0f, Vector2.Zero, guard1Direction, 1f);
+                _spriteBatch.Draw(wallTexture, wallRects1[0], Color.White);
+                _spriteBatch.Draw(wallTexture, wallRects1[1], Color.White);
+                _spriteBatch.Draw(wallTexture, wallRects1[2], Color.White);
+                _spriteBatch.Draw(wallTexture, wallRects1[3], Color.White);
+                _spriteBatch.Draw(wallTexture, wallRects1[4], Color.White);
 
+
+
+            }
+
+            if (screen == Screen.PassLevel)
+            {
+                _spriteBatch.Draw(rectangleTexture, window, Color.Black);
+                _spriteBatch.Draw(rectangleTexture, levelPassRect, Color.Red);
+                _spriteBatch.DrawString(introFont, ("LEVEL PASSED"), new Vector2(270, 75), Color.White);
+                _spriteBatch.DrawString(buttonFont, ("LEVELS"), new Vector2(420, 270), Color.White);
 
 
             }
