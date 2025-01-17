@@ -225,6 +225,25 @@
 /processorParam:TextureFormat=Compressed
 /build:introFont.spritefont
 
+#begin keycard.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:keycard.png
+
+#begin keycardFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:keycardFont.spritefont
+
 #begin prison background.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -272,4 +291,16 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:titleBackground.jpg
+
+#begin vent.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:vent.png
 
