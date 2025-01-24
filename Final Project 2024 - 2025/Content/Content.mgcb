@@ -86,6 +86,12 @@
 /processorParam:TextureFormat=Color
 /build:cabinet shut.png
 
+#begin CJ2 Theme Music.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:CJ2 Theme Music.wav
+
 #begin Colton Prisoner.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -206,6 +212,12 @@
 /processorParam:TextureFormat=Color
 /build:guard right.png
 
+#begin guard sound.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:guard sound.wav
+
 #begin guard up.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -224,6 +236,12 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:introFont.spritefont
+
+#begin keycard sound.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:keycard sound.wav
 
 #begin keycard.png
 /importer:TextureImporter
@@ -291,6 +309,12 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:titleBackground.jpg
+
+#begin vent sound.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:vent sound.wav
 
 #begin vent.png
 /importer:TextureImporter

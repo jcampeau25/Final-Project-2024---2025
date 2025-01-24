@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -12,26 +13,31 @@ namespace Final_Project_2024___2025
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        Texture2D hallwayTexture, titleBackgroundTexture, idleTexture, buttonTexture, playerTexture;
-        Texture2D doorTexture, keycardTexture;
+        Texture2D titleBackgroundTexture, idleTexture, buttonTexture, playerTexture;
+        Texture2D doorTexture, keycardTexture, ventTexture;
         Texture2D rectangleTexture, wallTexture, guardLeftTexture, guardRightTexture, guardUpTexture,guardDownTexture;
         Rectangle window, playButtonRect, levelButtonRect, levelPassRect, playerRect, doorRect, keycardRect, guardRect1A, guardRect2A, guardRect2B, guardRect2C, guardRect3A, guardRect3B;
-        Rectangle level1Rect, level2Rect, level3Rect, level4Rect, level5Rect;
-        Rectangle startLevel1Rect, startLevel2Rect, startLevel3Rect, startLevel4Rect, startLevel5Rect;
-        Vector2 playerSpeed, guard1ASpeed, guard2ASpeed, guard2BSpeed, guard2CSpeed;
+        Rectangle guardRect4A, guardRect4B, guardRect4C, guardRect4D, guard4CStart, lights4Rect;
+        Rectangle level1Rect, level2Rect, level3Rect, level4Rect;
+        Rectangle vent3ARect, vent3BRect, vent4ARect, vent4BRect;
+        Rectangle startLevel1Rect, startLevel2Rect, startLevel3Rect, startLevel4Rect;
+        Vector2 playerSpeed, guard1ASpeed, guard2ASpeed, guard2BSpeed, guard2CSpeed, guard3ASpeed, guard3Bspeed, guard4ASpeed, guard4BSpeed, guard4CSpeed;
         Screen screen;
         MouseState mouseState, prevMouseState;
-        KeyboardState keyboardState;
+        KeyboardState keyboardState, prevKeyboardState;
         SpriteFont introFont, buttonFont, keycardFont;
 
-        SpriteEffects guard1ADirection, guard2ADirection, guard2BDirection, guard2CDirection;
+        SpriteEffects guard1ADirection, guard2ADirection, guard2BDirection, guard2CDirection, guard3ADirection, guard4ADirection, guard4BDirection;
+
+        SoundEffect ventSound, themeMusic, guardSound;
+        SoundEffectInstance themeMusicInstance;
 
 
         int runRight = 0;
         int runLeft = 0;
         float runSeconds = 0f;
 
-        bool keycard;
+        bool keycard, lightsOff;
 
         List<Texture2D> runRightTextures;
         List<Texture2D> runLeftTextures;
@@ -72,6 +78,10 @@ namespace Final_Project_2024___2025
             guard2ASpeed = new Vector2(0, 7);
             guard2BSpeed = new Vector2(5, 0);
             guard2CSpeed = new Vector2(0, 2);
+            guard3ASpeed = new Vector2(6, 0);
+            guard4ASpeed = new Vector2(5, 0);
+            guard4BSpeed = new Vector2(-7, 0);
+            guard4CSpeed = new Vector2(2, 0);
 
             runRightTextures = new List<Texture2D>();
             runLeftTextures = new List<Texture2D>();
@@ -84,7 +94,7 @@ namespace Final_Project_2024___2025
             startLevel1Rect = new Rectangle(20, 500, 80, 80);
             startLevel2Rect = new Rectangle(5, 5, 80, 80);
             startLevel3Rect = new Rectangle(450, 500, 80, 80);
-            //guardRects1 = new List<Rectangle>();
+            startLevel4Rect = new Rectangle(860, 500, 80, 80);
             
             wallRects1.Add(new Rectangle(0, 470, 700, 20));
             wallRects1.Add(new Rectangle(850, 340, 20, 260));
@@ -109,9 +119,16 @@ namespace Final_Project_2024___2025
             wallRects3.Add(new Rectangle(430, 100, 20, 300));
             wallRects3.Add(new Rectangle(550, 100, 20, 300));
 
+            wallRects4.Add(new Rectangle(130, 120, 870, 20));
+            wallRects4.Add(new Rectangle(0, 400, 300, 20));
+            wallRects4.Add(new Rectangle(800, 260, 20, 340));
+            wallRects4.Add(new Rectangle(500, 260, 300, 20));
+            wallRects4.Add(new Rectangle(500, 260, 20, 160));
+            wallRects4.Add(new Rectangle(0, 260, 300, 20));
+
+
 
             guard1ADirection = SpriteEffects.None;
-
             guard2ADirection = SpriteEffects.None;
             guard2BDirection = SpriteEffects.None;
             guard2CDirection = SpriteEffects.None;
@@ -123,16 +140,27 @@ namespace Final_Project_2024___2025
             guardRect2B = new Rectangle(560, 260, 65, 50);
             guardRect2C = new Rectangle(130, 10, 50, 65);
 
-            guardRect3A = new Rectangle(30, 380, 50, 65);
-            guardRect3B = new Rectangle(200, 20, 50, 65);
+            guardRect3A = new Rectangle(200, 20, 65, 50);
+            guardRect3B = new Rectangle(30, 380, 50, 65);
 
-            level1Rect = new Rectangle(260, 200, 100, 100);
-            level2Rect = new Rectangle(460, 200, 100, 100);
-            level3Rect = new Rectangle(660, 200, 100, 100);
-            level4Rect = new Rectangle(360, 325, 100, 100);
-            level5Rect = new Rectangle(560, 325, 100, 100);
+            guardRect4A = new Rectangle(10, 320, 65, 50);
+            guardRect4B = new Rectangle(860, 180, 65, 50);
+            guardRect4C = new Rectangle(280, 490, 65, 50);
+            guardRect4D = new Rectangle(30, 110, 50, 65);
+            guard4CStart = new Rectangle(280, 490, 65, 50);
+
+            level1Rect = new Rectangle(360, 200, 100, 100);
+            level2Rect = new Rectangle(560, 200, 100, 100);
+            level3Rect = new Rectangle(360, 325, 100, 100);
+            level4Rect = new Rectangle(560, 325, 100, 100);
+
+            vent3ARect = new Rectangle(650, 300, 75, 50);
+            vent3BRect = new Rectangle(30, 120, 75, 50);
+            vent4ARect = new Rectangle(20, 330, 75, 50);
+            vent4BRect = new Rectangle(240, 40, 75, 50);
 
 
+            lights4Rect = new Rectangle(785, 500, 15, 50);
 
             screen = Screen.Title;
 
@@ -154,7 +182,6 @@ namespace Final_Project_2024___2025
             idleTexture = Content.Load<Texture2D>("Colton Prisoner");
             rectangleTexture = Content.Load<Texture2D>("Rectangle");
             titleBackgroundTexture = Content.Load<Texture2D>("titleBackground");
-            hallwayTexture = Content.Load<Texture2D>("prison background");
             introFont = Content.Load<SpriteFont>("introFont");
             keycardFont = Content.Load<SpriteFont>("keycardFont");
             buttonFont = Content.Load<SpriteFont>("ButtonFont");
@@ -175,27 +202,37 @@ namespace Final_Project_2024___2025
 
             wallTexture = Content.Load<Texture2D>("brick wall");
             keycardTexture = Content.Load<Texture2D>("keycard");
+            ventTexture = Content.Load<Texture2D>("vent");
             doorTexture = Content.Load<Texture2D>("prison door");
             playerTexture = idleTexture;
 
+            themeMusic = Content.Load<SoundEffect>("CJ2 Theme Music");
+            themeMusicInstance = themeMusic.CreateInstance();
 
+            ventSound = Content.Load<SoundEffect>("vent sound");
+            guardSound = Content.Load<SoundEffect>("guard sound");
 
         }
 
         protected override void Update(GameTime gameTime)
         {
+            prevKeyboardState = keyboardState;
             prevMouseState = mouseState;
             mouseState = Mouse.GetState();
             keyboardState = Keyboard.GetState();
 
 
 
-            this.Window.Title = $"x = {mouseState.X}, y = {mouseState.Y}";
+            this.Window.Title = "Colton's Jailhouse 2";
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
             // TODO: Add your update logic here
+
+            themeMusicInstance.Play();
+            themeMusicInstance.IsLooped = true;
+
             if (screen == Screen.Title)
             {
 
@@ -206,9 +243,11 @@ namespace Final_Project_2024___2025
                     {
                         screen = Screen.Level1;
                         doorRect = new Rectangle(875, 450, 110, 180);
+                        keycardRect = new Rectangle(860, 500, 50, 85);
                         keycard = true;
 
                     }
+
                     if (mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton == ButtonState.Released)
                     {
                         if (levelButtonRect.Contains(mouseState.Position))
@@ -241,7 +280,8 @@ namespace Final_Project_2024___2025
                         screen = Screen.Level3;
                         playerRect = startLevel3Rect;
                         keycard = false;
-                        keycardRect = new Rectangle(30, 130, 50, 85);
+                        keycardRect = new Rectangle(30, 300, 50, 85);
+                        doorRect = new Rectangle(260, 220, 110, 180);
 
 
                     }
@@ -249,11 +289,14 @@ namespace Final_Project_2024___2025
                     else if (level4Rect.Contains(mouseState.Position))
                     {
                         screen = Screen.Level4;
+                        playerRect = startLevel4Rect;
+                        keycard = false;
+                        lightsOff = false;
+                        guardRect4C = guard4CStart;
+                        keycardRect = new Rectangle(60, 480, 50, 85);
+                        doorRect = new Rectangle(910, 0, 90, 120);
                     }
-                    else if (level5Rect.Contains(mouseState.Position))
-                    {
-                        screen = Screen.Level5;
-                    }
+                    
                 }
             }
             else if (screen == Screen.Level1)
@@ -277,8 +320,10 @@ namespace Final_Project_2024___2025
 
 
                 if (playerRect.Intersects(guardRect1A))
+                {
                     playerRect = startLevel1Rect;
-
+                    guardSound.Play();
+                }
                 foreach (Rectangle wall in wallRects1)
                     if (playerRect.Intersects(wall))
                         playerRect.Offset(-playerSpeed);
@@ -333,24 +378,130 @@ namespace Final_Project_2024___2025
                 }
 
                 if (playerRect.Intersects(guardRect2A) || playerRect.Intersects(guardRect2B) || playerRect.Intersects(guardRect2C))
+                {
                     playerRect = startLevel2Rect;
+                    keycard = false;
+                    guardSound.Play();
 
+                }
             }
 
             if (screen == Screen.Level3)
             {
                 GetPlayerSpeed(gameTime);
 
+                guardRect3A.Offset(guard3ASpeed);
 
+                if (guardRect3A.Left <= 200 || guardRect3A.Right >= 800)
+                {
+                    guard3ASpeed.X *= -1;
+                    if (guard3ASpeed.X > 0)
+                        guard3ADirection = SpriteEffects.None;
+                    else
+                        guard3ADirection = SpriteEffects.FlipHorizontally;
 
+                }
 
+                if (keyboardState.IsKeyDown(Keys.E) && prevKeyboardState.IsKeyUp(Keys.E))
+                {
+                    if (playerRect.Intersects(vent3ARect))
+                    {
+                        ventSound.Play();
+                        playerRect = new Rectangle(25, 75, 80, 80);
+                    }
+                    
+                    else if (playerRect.Intersects(vent3BRect))
+                    {
+                        ventSound.Play();
+                        playerRect = new Rectangle(640, 240, 80, 80);
+                    }
+                }
 
                 foreach (Rectangle wall in wallRects3)
                     if (playerRect.Intersects(wall))
                         playerRect.Offset(-playerSpeed);
+
+                if (playerRect.Intersects(guardRect3A) || playerRect.Intersects(guardRect3B))
+                {
+                    playerRect = startLevel3Rect;
+                    keycard = false;
+                    guardSound.Play();
+
+                }
+                
             }
 
+            if (screen == Screen.Level4)
+            {
+                GetPlayerSpeed(gameTime);
 
+                guardRect4A.Offset(guard4ASpeed);
+
+                guardRect4B.Offset(guard4BSpeed);
+
+                if (lightsOff == true && guardRect4C.Right <= 780)
+                    guardRect4C.Offset(guard4CSpeed);
+
+                //{
+                //    if (guardRect4C.Right <= 780)
+                //        guardRect4C.Offset(guard4CSpeed);
+                //    else
+                //        guard4CSpeed.X = 0;
+                //}
+
+
+                if (guardRect4A.Left <= 0 || guardRect4A.Right >= 500)
+                {
+                    guard4ASpeed.X *= -1;
+                    if (guard4ASpeed.X > 0)
+                        guard4ADirection = SpriteEffects.None;
+                    else
+                        guard4ADirection = SpriteEffects.FlipHorizontally;
+
+                }
+
+
+                if (guardRect4B.Left <= 0 || guardRect4B.Right >= 1000)
+                {
+                    guard4BSpeed.X *= -1;
+                    if (guard4BSpeed.X < 0)
+                        guard4BDirection = SpriteEffects.None;
+                    else
+                        guard4BDirection = SpriteEffects.FlipHorizontally;
+
+                }
+
+                foreach (Rectangle wall in wallRects4)
+                    if (playerRect.Intersects(wall))
+                        playerRect.Offset(-playerSpeed);
+
+                if (keyboardState.IsKeyDown(Keys.E) && prevKeyboardState.IsKeyUp(Keys.E))
+                {
+                    if (playerRect.Intersects(lights4Rect))
+                        lightsOff = true;
+
+                    else if (playerRect.Intersects(vent4ARect))
+                    {
+                        ventSound.Play();
+                        playerRect = new Rectangle(230, 1, 80, 80);
+                    }
+
+                    else if (playerRect.Intersects(vent4BRect))
+                    {
+                        ventSound.Play();
+                        playerRect = new Rectangle(10, 285, 80, 80);
+                    }
+                }
+
+                if (playerRect.Intersects(guardRect4A) || playerRect.Intersects(guardRect4B) || playerRect.Intersects(guardRect4C) || playerRect.Intersects(guardRect4D))
+                {
+                    guardSound.Play();
+                    playerRect = startLevel4Rect;
+                    keycard = false;
+                    guardRect4C = guard4CStart;
+                    lightsOff = false;
+                }
+            }
 
             else if (screen == Screen.PassLevel)
             {
@@ -414,8 +565,9 @@ namespace Final_Project_2024___2025
                 playerRect.Offset(-playerSpeed);
 
             if (playerRect.Intersects(keycardRect))
+            {
                 keycard = true;
-
+            }
 
 
 
@@ -448,12 +600,10 @@ namespace Final_Project_2024___2025
                 _spriteBatch.Draw(rectangleTexture, level2Rect, Color.CornflowerBlue);
                 _spriteBatch.Draw(rectangleTexture, level3Rect, Color.CornflowerBlue);
                 _spriteBatch.Draw(rectangleTexture, level4Rect, Color.CornflowerBlue);
-                _spriteBatch.Draw(rectangleTexture, level5Rect, Color.CornflowerBlue);
-                _spriteBatch.DrawString(introFont, ("1"), new Vector2(300, 190), Color.Red);
-                _spriteBatch.DrawString(introFont, ("2"), new Vector2(490, 190), Color.Red);
-                _spriteBatch.DrawString(introFont, ("3"), new Vector2(690, 190), Color.Red);
-                _spriteBatch.DrawString(introFont, ("4"), new Vector2(390, 315), Color.Red);
-                _spriteBatch.DrawString(introFont, ("5"), new Vector2(590, 315), Color.Red);
+                _spriteBatch.DrawString(introFont, ("1"), new Vector2(400, 190), Color.Red);
+                _spriteBatch.DrawString(introFont, ("2"), new Vector2(590, 190), Color.Red);
+                _spriteBatch.DrawString(introFont, ("3"), new Vector2(390, 315), Color.Red);
+                _spriteBatch.DrawString(introFont, ("4"), new Vector2(590, 315), Color.Red);
 
             }
 
@@ -509,6 +659,9 @@ namespace Final_Project_2024___2025
             if (screen == Screen.Level3)
             {
                 _spriteBatch.Draw(rectangleTexture, window, Color.Black);
+                _spriteBatch.Draw(doorTexture, doorRect, Color.White);
+                _spriteBatch.Draw(ventTexture, vent3ARect, Color.White);
+                _spriteBatch.Draw(ventTexture, vent3BRect, Color.White);
                 _spriteBatch.Draw(playerTexture, playerRect, Color.White);
                 _spriteBatch.Draw(wallTexture, wallRects3[0], Color.White);
                 _spriteBatch.Draw(wallTexture, wallRects3[1], Color.White);
@@ -516,10 +669,56 @@ namespace Final_Project_2024___2025
                 _spriteBatch.Draw(wallTexture, wallRects3[3], Color.White);
                 _spriteBatch.Draw(wallTexture, wallRects3[4], Color.White);
                 _spriteBatch.Draw(wallTexture, wallRects3[5], Color.White);
+                _spriteBatch.Draw(guardRightTexture, guardRect3A, null, Color.White, 0f, Vector2.Zero, guard3ADirection, 1f);
+                _spriteBatch.Draw(guardDownTexture, guardRect3B, Color.White);
 
                 if (keycard == false)
                     _spriteBatch.Draw(keycardTexture, keycardRect, Color.White);
+
+                if (keycard == false && doorRect.Contains(playerRect))
+                    _spriteBatch.DrawString(keycardFont, "Keycard Required", new Vector2(230, 180), Color.Red);
+
+                if (playerRect.Intersects(vent3ARect))
+                    _spriteBatch.DrawString(keycardFont, "Use Vent (E)", new Vector2(620, 360), Color.Red);
+
             }
+
+            if (screen == Screen.Level4)
+            {
+                _spriteBatch.Draw(rectangleTexture, window, Color.Black);
+                _spriteBatch.Draw(rectangleTexture, lights4Rect, Color.Gray);
+                _spriteBatch.Draw(doorTexture, doorRect, Color.White);
+                _spriteBatch.Draw(ventTexture, vent4ARect, Color.White);
+                _spriteBatch.Draw(ventTexture, vent4BRect, Color.White);
+                _spriteBatch.Draw(playerTexture, playerRect, Color.White);
+                _spriteBatch.Draw(wallTexture, wallRects4[0], Color.White);
+                _spriteBatch.Draw(wallTexture, wallRects4[1], Color.White);
+                _spriteBatch.Draw(wallTexture, wallRects4[2], Color.White);
+                _spriteBatch.Draw(wallTexture, wallRects4[3], Color.White);
+                _spriteBatch.Draw(wallTexture, wallRects4[4], Color.White);
+                _spriteBatch.Draw(wallTexture, wallRects4[5], Color.White);
+                _spriteBatch.Draw(guardRightTexture, guardRect4A, null, Color.White, 0f, Vector2.Zero, guard4ADirection, 1f);
+                _spriteBatch.Draw(guardLeftTexture, guardRect4B, null, Color.White, 0f, Vector2.Zero, guard4BDirection, 1f);
+                _spriteBatch.Draw(guardRightTexture, guardRect4C, Color.White);
+                _spriteBatch.Draw(guardDownTexture, guardRect4D, Color.White);
+
+                if (playerRect.Intersects(lights4Rect))
+                    _spriteBatch.DrawString(keycardFont, "Turn off lights (E)", new Vector2(600, 400), Color.Red);
+
+
+                if (keycard == false && doorRect.Contains(playerRect))
+                    _spriteBatch.DrawString(keycardFont, "Keycard Required", new Vector2(700, 30), Color.Red);
+                
+                if (keycard == false)
+                    _spriteBatch.Draw(keycardTexture, keycardRect, Color.White);
+
+
+                if (lightsOff == true)
+                    _spriteBatch.Draw(rectangleTexture, window, Color.Black * 0.75f);
+            }
+
+                
+            
 
 
             if (screen == Screen.PassLevel)
